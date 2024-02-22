@@ -4,13 +4,11 @@ from modules.menu import Menu
 from modules.style import error, warn, bold, underlined
 
 class ConfigEditor:
-    def __init__(self, file: str = None):
+    def __init__(self, file: str = ""):
         self.usr_parsers = UserParsers()
-        self.file = open(file) if file is not None else None
-        self.file_content = file.read() if file is not None else None
         self.file_name = file
 
-        self.parser: Parser = None
+        self.parser = None
 
     def set_file(self, file):
         self.file = open(file, 'w+')
@@ -31,8 +29,8 @@ class ConfigEditor:
                 return
         warn("Couldn't choose a suitable Parser. No parser was selected automatically")
     
-    def show_menu(self):
-        if self.file or self.file_content is None:
+    def show_menu(self): 
+        if self.file_name == "":
             error("File is None")
         if self.parser is None:
             error("No parser has been selected.")

@@ -33,18 +33,19 @@ class UserParsers:
     
     def get_parser(self, name) -> Parser | None:
         for parser_conf in self.config["parsers"]:
-            if (n:=parser_conf["name"]) == name:
+            if parser_conf["name"] == name:
                return self.load_parser_from_dict(parser_conf)
     
     def load_parser_from_dict(self, parser_conf: dict):
         base_path = PARSER_SHARE_PATH / "scripts"
+        filename = parser_conf['name']
         module_path = parser_conf.get("script")
         if module_path is None:
-            module_path = PARSER_SHARE_PATH / "scripts" / f"{n}.py"
+            module_path = PARSER_SHARE_PATH / "scripts" / f"{filename}.py"
         else:
             module_path = base_path / module_path
 
-        spec = importlib.util.spec_from_file_location(n, module_path)
+        spec = importlib.util.spec_from_file_location(filename, module_path)
         module = importlib.util.module_from_spec(spec)
         try:
             spec.loader.exec_module(module)
@@ -52,14 +53,14 @@ class UserParsers:
             error(f'"{module_path}" does not exist, if this is not the path of the script, you will need to specify the path on config')
         parser_obj: Parser = getattr(module, "Parser")
         if parser_obj is None:
-            warn("The module", n, "doesn't have the class Parser")
+            warn("The module", filename, "doesn't have the class Parser")
             return
         if parser_conf.get("file") is None:
-            error("Parser", n, "has no file section on the parsers.conf")
+            error("Parser", filename, "has no file section on the parsers.conf")
         if parser_conf["file"].get("name") is None:
             error("Parser has the file section incomplete, missing name key on file")
         if parser_conf["file"].get("type") is None:
-            error("Parser", n, "has the file section incomplete, missing type key")
+            error("Parser", filename, "has the file section incomplete, missing type key")
 
         parser_obj.filename = parser_conf["file"]["name"]
         parser_obj.filetype = parser_conf["file"]["type"]
